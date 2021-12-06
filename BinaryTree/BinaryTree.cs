@@ -95,6 +95,12 @@ namespace BinaryTree
                     else if (newItemParent.Value < value)
                     {
                         newItemParent.RightChild = newItem;
+
+                        while (newItemParent != null)
+                        {
+                            newItemParent.RightChildrenCount++;
+                            newItemParent = newItemParent.Parent;
+                        }
                     }
                     else
                     {
@@ -118,10 +124,140 @@ namespace BinaryTree
             return true;
         }
 
+        private void RemoveNode(ref Node nodeParent, ref Node node, ref Node nodeRightChild, ref Node nodeLeftChild,
+            ref Node lastChild)
+        {
+            Node tmp;
+            
+            // Shifting current node's right child into nodes place
+            if (nodeParent.LeftChild == node)
+            {
+                // If current node doesn't have right child, just shifting left child
+                if (nodeRightChild == null)
+                {
+                    nodeParent.LeftChild = nodeLeftChild;
+                    if (nodeLeftChild != null)
+                    {
+                        nodeLeftChild.Parent = nodeParent;
+                    }
+                    return;
+                }
+            
+                nodeParent.LeftChild = nodeRightChild;
+                nodeRightChild.Parent = nodeParent;
+            }
+            else
+            {
+                // If current node doesn't have right child, just shifting left child
+                if (nodeRightChild == null)
+                {
+                    nodeParent.RightChild = nodeLeftChild;
+                    if (nodeLeftChild != null)
+                    {
+                        nodeLeftChild.Parent = nodeParent;
+                    }
+                    else
+                    {
+                        // Notifying all parents only when we don't have left child, that'll take our place
+                        tmp = nodeParent;
+                        while (tmp != null)
+                        {
+                            tmp.RightChildrenCount--;
+                            tmp = tmp.Parent;
+                        }
+                    }
+                    return;
+                }
+            
+                nodeParent.RightChild = nodeRightChild;
+                nodeRightChild.Parent = nodeParent;
+            }
+            
+            // If we make shift of right child, we have to decrease RightChildrenCount of all parents
+            tmp = nodeParent;
+            while (tmp != null)
+            {
+                tmp.RightChildrenCount--;
+                tmp = tmp.Parent;
+            }
+            
+            // Finding the smallest node in right side to add left side to it
+            while (lastChild != null)
+            {
+                if (lastChild.LeftChild != null)
+                {
+                    lastChild = lastChild.LeftChild;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        
+            lastChild.LeftChild = nodeLeftChild;
+            if (nodeLeftChild != null)
+            {
+                nodeLeftChild.Parent = lastChild;
+                
+                while (lastChild != nodeParent)
+                {
+                    lastChild.RightChildrenCount += nodeLeftChild.RightChildrenCount;
+                    lastChild = lastChild.Parent;
+                }
+            }
+        }
+
+        private void RemoveParent(ref Node rightChild, ref Node leftChild, ref Node lastChild)
+        {
+            if (rightChild != null)
+            {
+                ParentNode = rightChild;
+                rightChild.Parent = null;
+                            
+                // Finding the smallest node in right side to add left side to it
+                while (lastChild != null)
+                {
+                    if (lastChild.LeftChild != null)
+                    {
+                        lastChild = lastChild.LeftChild;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                    
+                lastChild.LeftChild = leftChild;
+                if (leftChild != null)
+                {
+                    leftChild.Parent = lastChild;
+                    
+                    while (lastChild != rightChild)
+                    {
+                        lastChild.RightChildrenCount += leftChild.RightChildrenCount;
+                        lastChild = lastChild.Parent;
+                    }
+                }
+            }
+            // Just shifting left child
+            else if (leftChild != null)
+            {
+                ParentNode = leftChild;
+                leftChild.Parent = null;
+            }
+            // Just deleting parent node with no children
+            else
+            {
+                ParentNode = null;
+            }
+        }
+
         public void RemoveItem(int value)
         {
-            foreach (Node node in Nodes)
+            for (int i = 0; i < Nodes.Count; i++)
             {
+                Node node = Nodes[i];
+                
                 if (node.Value == value)
                 {
                     Node rightChild = node.RightChild;
@@ -134,96 +270,11 @@ namespace BinaryTree
                     // If we're not trying to delete parent node
                     if (parent != null)
                     {
-                        // Shifting current node's right child into nodes place
-                        if (parent.LeftChild == node)
-                        {
-                            // If current node doesn't have right child, just shifting left child
-                            if (rightChild == null)
-                            {
-                                parent.LeftChild = leftChild;
-                                if (leftChild != null)
-                                {
-                                    leftChild.Parent = parent;
-                                }
-                                return;
-                            }
-                        
-                            parent.LeftChild = rightChild;
-                            rightChild.Parent = parent;
-                        }
-                        else
-                        {
-                            // If current node doesn't have right child, just shifting left child
-                            if (rightChild == null)
-                            {
-                                parent.RightChild = leftChild;
-                                if (leftChild != null)
-                                {
-                                    leftChild.Parent = parent;
-                                }
-                                return;
-                            }
-                        
-                            parent.RightChild = rightChild;
-                            rightChild.Parent = parent;
-                        }
-                        
-                        // Finding the smallest node in right side to add left side to it
-                        while (lastChild != null)
-                        {
-                            if (lastChild.LeftChild != null)
-                            {
-                                lastChild = lastChild.LeftChild;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                    
-                        lastChild.LeftChild = leftChild;
-                        if (leftChild != null)
-                        {
-                            leftChild.Parent = lastChild;
-                        }
+                        RemoveNode(ref parent, ref node, ref rightChild, ref leftChild, ref lastChild);
                     }
                     else
                     {
-                        if (rightChild != null)
-                        {
-                            ParentNode = rightChild;
-                            rightChild.Parent = null;
-                            
-                            // Finding the smallest node in right side to add left side to it
-                            while (lastChild != null)
-                            {
-                                if (lastChild.LeftChild != null)
-                                {
-                                    lastChild = lastChild.LeftChild;
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                    
-                            lastChild.LeftChild = leftChild;
-                            if (leftChild != null)
-                            {
-                                leftChild.Parent = lastChild;
-                            }
-                        }
-                        // Just shifting left child
-                        else if (leftChild != null)
-                        {
-                            ParentNode = leftChild;
-                            leftChild.Parent = null;
-                        }
-                        // Just deleting parent node with no children
-                        else
-                        {
-                            ParentNode = null;
-                        }
+                        RemoveParent(ref rightChild, ref leftChild, ref lastChild);
                     }
 
                     // If we don't force stop of the loop, it'll continue and give error

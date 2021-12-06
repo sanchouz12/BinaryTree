@@ -18,7 +18,7 @@
                 Input an item to add or remove
             </TextBlock>
             <xctk:IntegerUpDown Margin="0 0 0 10"
-                                Value="0" Minimum="-100000" Maximum="100000"
+                                Value="0" Minimum="-10000000" Maximum="10000000"
                                 Name="IntegerUpDown"></xctk:IntegerUpDown>
             <Button Content="Add" Margin="0 0 0 10" Click="ButtonAdd_OnClick"></Button>
             <Button Content="Remove" Click="ButtonRemove_OnClick"></Button>

@@ -38,9 +38,9 @@ namespace BinaryTree
             _rightBorderX = Canv.Width;
             _bottomBorderY = Canv.Height;
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 10000000; i++)
             {
-                _forest.AddItem(rand.Next(-5000, 5000));
+                _forest.AddItem(rand.Next(-10000000, 10000000));
             }
             DrawForest();
         }
@@ -105,20 +105,19 @@ namespace BinaryTree
             });
         }
 
-        private int CountRightChildren(Node currentNode)
+        private int CountRightChildren(Node currentNode, ref int count)
         {
-            int count = 0;
             if (currentNode.RightChild != null)
             {
                 count++;
-                count += CountRightChildren(currentNode.RightChild);
+                count += CountRightChildren(currentNode.RightChild, ref count);
             }
-
+        
             if (currentNode.LeftChild != null)
             {
-                count += CountRightChildren(currentNode.LeftChild);
+                count += CountRightChildren(currentNode.LeftChild, ref count);
             }
-
+        
             return count;
         }
 
@@ -131,13 +130,12 @@ namespace BinaryTree
             return testX && testY;
         }
 
-        private void DrawForestRecur(double x, double y, Node node, ref int renderingCount)
+        private void DrawForestRecur(double x, double y, Node node)
         {
             // Checking if we need to render the node
             if (CheckBounds(x, y))
             {
                 DrawTreeNode(x, y, node);
-                renderingCount++;
             }
 
             if (node.LeftChild != null)
@@ -148,11 +146,19 @@ namespace BinaryTree
                 DrawLine(
                     x + CircleWidth / 2.0, y + CircleHeight,
                     lx + CircleWidth / 2.0, ly);
-                DrawForestRecur(lx, ly, node.LeftChild, ref renderingCount);
+
+                // It makes sense to follow the recursion from this child only if it's
+                // inside right and bottom bounds of the screen
+                if (!((ly > _bottomBorderY - CircleHeight - 1) ||
+                      (lx > _rightBorderX - 1)))
+                {
+                    DrawForestRecur(lx, ly, node.LeftChild);
+                }
             }
             if (node.RightChild != null)
             {
-                int rightChildrenCount = node.LeftChild == null ? 0 : CountRightChildren(node.LeftChild);
+                int rightChildrenCount = node.LeftChild == null ? 0 : node.LeftChild.RightChildrenCount;
+
                 double rx = x + CircleWidth + CirclePadding +
                             (CircleWidth + CirclePadding) * rightChildrenCount,
                     ry = y + CircleHeight + CirclePadding;
@@ -160,7 +166,14 @@ namespace BinaryTree
                 DrawLine(
                     x + CircleWidth / 2.0, y + CircleHeight,
                     rx + CircleWidth / 2.0, ry);
-                DrawForestRecur(rx, ry, node.RightChild, ref renderingCount);
+                
+                // It makes sense to follow the recursion from this child only if it's
+                // inside right and bottom bounds of the screen
+                if (!((ry > _bottomBorderY - CircleHeight - 1) ||
+                      (rx > _rightBorderX - 1)))
+                {
+                    DrawForestRecur(rx, ry, node.RightChild);
+                }
             }
         }
 
@@ -169,15 +182,12 @@ namespace BinaryTree
             Canv.Children.Clear();
             
             Node parentNode = _forest.GetParentNode();
-            int renderingCount = 0;
 
             // parentNode can be null, if tree doesn't have any values
             if (parentNode != null)
             {
-                DrawForestRecur(_startX, _startY, parentNode, ref renderingCount);
+                DrawForestRecur(_startX, _startY, parentNode);
             }
-            
-            Debug.Print($"Rendering count: {renderingCount}");
         }
 
         private void Canv_OnMouseMove(object sender, MouseEventArgs e)

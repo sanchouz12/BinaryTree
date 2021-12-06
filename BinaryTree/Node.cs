@@ -6,6 +6,7 @@
         public Node RightChild { get; set; }
         public Node LeftChild { get; set; }
         public int Value { get; }
+        public int RightChildrenCount { get; set; }
 
         public Node(Node parent, int value)
         {
@@ -13,6 +14,7 @@
             Value = value;
             RightChild = null;
             LeftChild = null;
+            RightChildrenCount = 0;
         }
 
         ~Node()
