@@ -25,22 +25,22 @@ namespace BinaryTree
         private bool _isMoving;
         private Point _mouseDownPos;
         
-        private readonly Forest _forest;
+        private readonly Tree _forest;
         
         public MainWindow()
         {
             Random rand = new Random();
             
             InitializeComponent();
-            _forest = new Forest();
+            _forest = new Tree();
             _leftBorderX = 0;
             _topBorderY = 0;
             _rightBorderX = Canv.Width;
             _bottomBorderY = Canv.Height;
 
-            for (int i = 0; i < 10000000; i++)
+            for (int i = 0; i < 100000; i++)
             {
-                _forest.AddItem(rand.Next(-10000000, 10000000));
+                _forest.AddItem(rand.Next(-100000, 100000));
             }
             DrawForest();
         }
@@ -181,12 +181,12 @@ namespace BinaryTree
         {
             Canv.Children.Clear();
             
-            Node parentNode = _forest.GetParentNode();
+            Node rootNode = _forest.GetRootNode();
 
             // parentNode can be null, if tree doesn't have any values
-            if (parentNode != null)
+            if (rootNode != null)
             {
-                DrawForestRecur(_startX, _startY, parentNode);
+                DrawForestRecur(_startX, _startY, rootNode);
             }
         }
 

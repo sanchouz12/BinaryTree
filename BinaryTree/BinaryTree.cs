@@ -3,31 +3,31 @@ using System.Collections.Generic;
 
 namespace BinaryTree
 {
-    public class Forest
+    public class Tree
     {
         private List<Node> Nodes { get; }
-        private Node ParentNode { get; set; }
+        private Node RootNode { get; set; }
 
-        public Forest()
+        public Tree()
         {
             Nodes = new List<Node>();
         }
 
-        ~Forest()
+        ~Tree()
         {
             Nodes.Clear();
         }
 
-        public Node GetParentNode()
+        public Node GetRootNode()
         {
-            return ParentNode;
+            return RootNode;
         }
 
         private Node DefineParent(int value)
         {
             try
             {
-                Node res = ParentNode;
+                Node res = RootNode;
                 
                 // Looping until we reach a node, that doesn't have any children
                 // Parent node at first doesn't have one, so second time we call this function, it'll always
@@ -117,7 +117,7 @@ namespace BinaryTree
             {
                 // First item in the tree
                 newItem = new Node(null, value);
-                ParentNode = newItem;
+                RootNode = newItem;
             }
             
             Nodes.Add(newItem);
@@ -207,11 +207,11 @@ namespace BinaryTree
             }
         }
 
-        private void RemoveParent(ref Node rightChild, ref Node leftChild, ref Node lastChild)
+        private void RemoveRootNode(ref Node rightChild, ref Node leftChild, ref Node lastChild)
         {
             if (rightChild != null)
             {
-                ParentNode = rightChild;
+                RootNode = rightChild;
                 rightChild.Parent = null;
                             
                 // Finding the smallest node in right side to add left side to it
@@ -242,13 +242,13 @@ namespace BinaryTree
             // Just shifting left child
             else if (leftChild != null)
             {
-                ParentNode = leftChild;
+                RootNode = leftChild;
                 leftChild.Parent = null;
             }
             // Just deleting parent node with no children
             else
             {
-                ParentNode = null;
+                RootNode = null;
             }
         }
 
@@ -274,7 +274,7 @@ namespace BinaryTree
                     }
                     else
                     {
-                        RemoveParent(ref rightChild, ref leftChild, ref lastChild);
+                        RemoveRootNode(ref rightChild, ref leftChild, ref lastChild);
                     }
 
                     // If we don't force stop of the loop, it'll continue and give error
